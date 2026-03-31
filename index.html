@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FancyTags — Minecraft Badge Editor</title>
+<title>Fancy Badge Editor by UsainSrht</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
@@ -50,6 +50,7 @@
 
   /* LAYOUT */
   #main { display: grid; grid-template-columns: 1fr 270px; gap: 12px; }
+  #right-col { position: sticky; top: 12px; align-self: start; }
 
   /* PANEL */
   .panel {
@@ -77,6 +78,42 @@
   input[type=text]:focus, input[type=number]:focus {
     border-color: #000 var(--purple-lite) var(--purple-lite) #000;
     box-shadow: inset 2px 2px 0 #000, 0 0 6px var(--purple-mid);
+  }
+
+  /* SLIDERS */
+  .slider-wrap { display: flex; align-items: center; gap: 8px; }
+  .pixel-slider {
+    -webkit-appearance: none; appearance: none;
+    width: 120px; height: 12px;
+    background: linear-gradient(180deg, var(--gray-hi), var(--gray-dark));
+    border: 2px solid; border-color: #000 var(--gray-lite) var(--gray-lite) #000;
+    box-shadow: inset 1px 1px 0 #000;
+    cursor: pointer;
+  }
+  .pixel-slider:focus { outline: none; box-shadow: inset 1px 1px 0 #000, 0 0 6px var(--purple-mid); }
+  .pixel-slider::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 10px; height: 16px;
+    background: var(--yellow-mid);
+    border: 2px solid; border-color: var(--yellow-lite) var(--yellow-dark) var(--yellow-dark) var(--yellow-lite);
+    box-shadow: inset 1px 1px 0 var(--yellow-hi), inset -1px -1px 0 #000;
+    margin-top: -3px;
+  }
+  .pixel-slider::-moz-range-track {
+    height: 12px;
+    background: linear-gradient(180deg, var(--gray-hi), var(--gray-dark));
+    border: 2px solid; border-color: #000 var(--gray-lite) var(--gray-lite) #000;
+    box-shadow: inset 1px 1px 0 #000;
+  }
+  .pixel-slider::-moz-range-thumb {
+    width: 10px; height: 16px; border-radius: 0;
+    background: var(--yellow-mid);
+    border: 2px solid; border-color: var(--yellow-lite) var(--yellow-dark) var(--yellow-dark) var(--yellow-lite);
+    box-shadow: inset 1px 1px 0 var(--yellow-hi), inset -1px -1px 0 #000;
+  }
+  .slider-val {
+    min-width: 38px; text-align: right;
+    color: var(--yellow-hi); font-size: 7px; text-shadow: 1px 1px 0 #000;
   }
 
   /* COLOR SWATCH */
@@ -172,6 +209,34 @@
   }
   #preview-canvas { position: relative; z-index: 1; image-rendering: pixelated; display: block; }
   #strip-canvas   { image-rendering: pixelated; display: block; }
+  .preview-shadow-wrap {
+    position: relative;
+    display: inline-block;
+    --ig-shadow: rgba(0,0,0,0);
+    --ig-px: 4px;
+  }
+  .preview-shadow-wrap::before,
+  .preview-shadow-wrap::after {
+    content: '';
+    position: absolute;
+    pointer-events: none;
+    background: var(--ig-shadow);
+    display: none;
+  }
+  .preview-shadow-wrap.has-ig-shadow::before {
+    display: block;
+    left: var(--ig-px);
+    right: 0;
+    bottom: calc(-1 * var(--ig-px));
+    height: var(--ig-px);
+  }
+  .preview-shadow-wrap.has-ig-shadow::after {
+    display: block;
+    top: var(--ig-px);
+    bottom: 0;
+    right: calc(-1 * var(--ig-px));
+    width: var(--ig-px);
+  }
 
   /* QUEUE */
   #queue-list {
@@ -192,7 +257,10 @@
   .divider { height: 2px; background: linear-gradient(90deg,transparent,var(--gray-hi),transparent); margin: 8px 0; }
   .fx  { display: flex; gap: 6px; align-items: center; }
   .fxw { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-  @media (max-width:660px) { #main { grid-template-columns:1fr; } }
+  @media (max-width:660px) {
+    #main { grid-template-columns:1fr; }
+    #right-col { position: static; }
+  }
 </style>
 </head>
 <body>
@@ -200,8 +268,8 @@
 
   <div id="header">
     <div class="logo-box">FANCY</div>
-    <h1>TAG BADGE EDITOR</h1>
-    <div class="sub">for Minecraft Player Heads</div>
+    <h1>BADGE EDITOR</h1>
+    <div class="sub">by UsainSrht</div>
   </div>
 
   <div id="main">
@@ -307,7 +375,10 @@
             </div>
             <div>
               <label class="lbl">OPACITY (0-1)</label>
-              <input type="number" id="shadow-opacity" value="1" min="0" max="1" step="0.05" style="width:80px">
+              <div class="slider-wrap">
+                <input class="pixel-slider" type="range" id="shadow-opacity" value="1" min="0" max="1" step="0.01">
+                <span class="slider-val" id="shadow-opacity-val">1.00</span>
+              </div>
             </div>
           </div>
         </div>
@@ -347,7 +418,10 @@
           </div>
           <div class="row">
             <label>BORDER OPACITY (0-1)</label>
-            <input type="number" id="border-opacity" value="1" min="0" max="1" step="0.05" style="width:80px">
+            <div class="slider-wrap">
+              <input class="pixel-slider" type="range" id="border-opacity" value="1" min="0" max="1" step="0.01">
+              <span class="slider-val" id="border-opacity-val">1.00</span>
+            </div>
           </div>
         </div>
       </div>
@@ -400,18 +474,48 @@
 
     </div><!-- /left -->
 
-    <div><!-- RIGHT COLUMN -->
+    <div id="right-col"><!-- RIGHT COLUMN -->
 
       <div class="panel">
         <div class="panel-title">▓ PREVIEW</div>
         <div id="preview-area">
-          <div class="canvas-wrap">
-            <canvas id="preview-canvas" width="64" height="8"></canvas>
+          <div class="preview-shadow-wrap" id="single-preview-wrap">
+            <div class="canvas-wrap">
+              <canvas id="preview-canvas" width="64" height="8"></canvas>
+            </div>
           </div>
           <div id="preview-label" style="font-size:7px;color:var(--gray-edge)">SINGLE BADGE</div>
           <div class="divider" style="width:100%"></div>
-          <canvas id="strip-canvas"></canvas>
+          <div class="preview-shadow-wrap" id="strip-preview-wrap">
+            <canvas id="strip-canvas"></canvas>
+          </div>
           <div id="strip-label" style="font-size:7px;color:var(--gray-edge)">FULL STRIP</div>
+          <div class="divider" style="width:100%"></div>
+          <div style="width:100%;display:flex;flex-direction:column;gap:8px">
+            <div>
+              <label style="display:block;font-size:7px;color:var(--purple-glow);margin-bottom:4px;text-shadow:1px 1px 0 #000">INGAME SHADOW (PREVIEW ONLY)</label>
+              <div class="toggle-group" id="ig-shadow-enabled">
+                <div class="toggle-btn active" data-val="off">OFF</div>
+                <div class="toggle-btn" data-val="on">ON</div>
+              </div>
+            </div>
+            <div id="ig-shadow-settings" style="display:none">
+              <div class="row" style="margin-bottom:8px">
+                <label>COLOR</label>
+                <div class="fx">
+                  <div class="color-swatch" id="ig-shadow-color-swatch" style="background:#000000"><input type="color" id="ig-shadow-color" value="#000000"></div>
+                  <input type="text" id="ig-shadow-color-hex" value="#000000" style="width:80px">
+                </div>
+              </div>
+              <div class="row" style="margin-bottom:0">
+                <label>OPACITY (0-1)</label>
+                <div class="slider-wrap">
+                  <input class="pixel-slider" type="range" id="ig-shadow-opacity" value="0.65" min="0" max="1" step="0.01">
+                  <span class="slider-val" id="ig-shadow-opacity-val">0.65</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -462,6 +566,11 @@ const state = {
     color: '#000000',
     stops: [{color:'#ffe566',pos:0},{color:'#c49a00',pos:1}],
     opacity: 1,
+  },
+  previewShadow: {
+    enabled: false,
+    color: '#000000',
+    opacity: 0.65,
   },
   height: 8, hpad: 4, previewScale: 4, exportScale: 1,
 };
@@ -651,6 +760,29 @@ function sampleGrad(stops,t) {
   return parseColor(s[s.length-1].color);
 }
 
+function setSliderValueLabel(sliderId, labelId) {
+  const slider = document.getElementById(sliderId);
+  const label = document.getElementById(labelId);
+  if (!slider || !label) return;
+  label.textContent = (parseFloat(slider.value) || 0).toFixed(2);
+}
+
+function applyIngamePreviewShadow() {
+  const wraps = [
+    document.getElementById('single-preview-wrap'),
+    document.getElementById('strip-preview-wrap'),
+  ].filter(Boolean);
+  const px = `${Math.max(1, state.previewScale || 1)}px`;
+  const [r,g,b] = parseColor(state.previewShadow.color || '#000000');
+  const alpha = Math.max(0, Math.min(1, state.previewShadow.opacity ?? 0));
+  const shadowColor = `rgba(${r},${g},${b},${alpha})`;
+  wraps.forEach(wrap => {
+    wrap.style.setProperty('--ig-px', px);
+    wrap.style.setProperty('--ig-shadow', shadowColor);
+    wrap.classList.toggle('has-ig-shadow', !!state.previewShadow.enabled && alpha > 0);
+  });
+}
+
 // link simple color picker
 function linkPicker(inputId,hexId,swatchId,obj,key) {
   const inp=document.getElementById(inputId), hex=document.getElementById(hexId), sw=document.getElementById(swatchId);
@@ -838,13 +970,16 @@ function render() {
   pctx.drawImage(badge,0,0,pc.width,pc.height);
   document.getElementById('preview-label').textContent=`SINGLE: ${badge.width}×${badge.height}px`;
   renderStrip();
+  applyIngamePreviewShadow();
 }
 
 function renderStrip() {
   if(!queue.length) {
     const sc=document.getElementById('strip-canvas'); sc.width=64;sc.height=8;
     sc.getContext('2d').clearRect(0,0,64,8);
-    document.getElementById('strip-info').textContent='BADGES: 0 | SIZE: 0×8'; return;
+    document.getElementById('strip-info').textContent='BADGES: 0 | SIZE: 0×8';
+    applyIngamePreviewShadow();
+    return;
   }
   const sc2=state.previewScale;
   const badges=queue.map(q=>drawBadge(q));
@@ -854,6 +989,7 @@ function renderStrip() {
   const ctx=sc.getContext('2d'); ctx.imageSmoothingEnabled=false;
   let ox=0; badges.forEach(b=>{ctx.drawImage(b,ox*sc2,0,b.width*sc2,b.height*sc2);ox+=b.width;});
   document.getElementById('strip-info').textContent=`BADGES: ${queue.length} | SIZE: ${tw}×${mh}px`;
+  applyIngamePreviewShadow();
 }
 
 // ============================================================
@@ -919,6 +1055,7 @@ function loadItem(i) {
   syncPick('shadow-color','shadow-color-hex','shadow-color-swatch',state.shadow.color);
   document.getElementById('shadow-offset').value=state.shadow.offset;
   document.getElementById('shadow-opacity').value=state.shadow.opacity;
+  setSliderValueLabel('shadow-opacity', 'shadow-opacity-val');
   setToggleGroup('border-enabled',state.border.enabled?'on':'off');
   document.getElementById('border-settings').style.display=state.border.enabled?'':'none';
   setToggleGroup('border-type',state.border.type);
@@ -926,6 +1063,7 @@ function loadItem(i) {
   document.getElementById('border-grad-row').style.display=state.border.type==='gradient'?'':'none';
   syncPick('border-color','border-color-hex','border-color-swatch',state.border.color);
   document.getElementById('border-opacity').value=state.border.opacity;
+  setSliderValueLabel('border-opacity', 'border-opacity-val');
   renderStopsList('border-stops-list',state.border.stops,()=>render());
   setToggleGroup('height-sel',String(state.height));
   document.getElementById('h-pad').value=state.hpad;
@@ -990,6 +1128,11 @@ function init() {
     document.getElementById('border-grad-row').style.display=val==='gradient'?'':'none';
     render();
   });
+  initToggleGroup('ig-shadow-enabled',val=>{
+    state.previewShadow.enabled = val === 'on';
+    document.getElementById('ig-shadow-settings').style.display = state.previewShadow.enabled ? '' : 'none';
+    render();
+  });
   initToggleGroup('height-sel',val=>{state.height=parseInt(val);render();});
   initToggleGroup('preview-scale',val=>{state.previewScale=parseInt(val);render();});
   initToggleGroup('export-scale',val=>{state.exportScale=parseInt(val);});
@@ -998,12 +1141,35 @@ function init() {
   linkPicker('txt-color','txt-color-hex','txt-color-swatch',state.text,'color');
   linkPicker('shadow-color','shadow-color-hex','shadow-color-swatch',state.shadow,'color');
   linkPicker('border-color','border-color-hex','border-color-swatch',state.border,'color');
+  linkPicker('ig-shadow-color','ig-shadow-color-hex','ig-shadow-color-swatch',state.previewShadow,'color');
 
   document.getElementById('badge-text').addEventListener('input',e=>{state.text.value=e.target.value.toUpperCase();render();});
   document.getElementById('h-pad').addEventListener('input',e=>{state.hpad=Math.max(0,parseInt(e.target.value)||0);render();});
   document.getElementById('shadow-offset').addEventListener('input',e=>{state.shadow.offset=Math.max(1,parseInt(e.target.value)||1);render();});
-  document.getElementById('shadow-opacity').addEventListener('input',e=>{state.shadow.opacity=Math.max(0,Math.min(1,parseFloat(e.target.value)||0));render();});
-  document.getElementById('border-opacity').addEventListener('input',e=>{state.border.opacity=Math.max(0,Math.min(1,parseFloat(e.target.value)||0));render();});
+  document.getElementById('shadow-opacity').addEventListener('input',e=>{
+    state.shadow.opacity=Math.max(0,Math.min(1,parseFloat(e.target.value)||0));
+    setSliderValueLabel('shadow-opacity', 'shadow-opacity-val');
+    render();
+  });
+  document.getElementById('border-opacity').addEventListener('input',e=>{
+    state.border.opacity=Math.max(0,Math.min(1,parseFloat(e.target.value)||0));
+    setSliderValueLabel('border-opacity', 'border-opacity-val');
+    render();
+  });
+  document.getElementById('ig-shadow-opacity').addEventListener('input',e=>{
+    state.previewShadow.opacity=Math.max(0,Math.min(1,parseFloat(e.target.value)||0));
+    setSliderValueLabel('ig-shadow-opacity', 'ig-shadow-opacity-val');
+    render();
+  });
+
+  document.getElementById('shadow-opacity').value = state.shadow.opacity;
+  document.getElementById('border-opacity').value = state.border.opacity;
+  document.getElementById('ig-shadow-opacity').value = state.previewShadow.opacity;
+  setSliderValueLabel('shadow-opacity', 'shadow-opacity-val');
+  setSliderValueLabel('border-opacity', 'border-opacity-val');
+  setSliderValueLabel('ig-shadow-opacity', 'ig-shadow-opacity-val');
+  setToggleGroup('ig-shadow-enabled', state.previewShadow.enabled ? 'on' : 'off');
+  document.getElementById('ig-shadow-settings').style.display = state.previewShadow.enabled ? '' : 'none';
 
   document.getElementById('add-btn').addEventListener('click',()=>{
     queue.push(snap());selectedQueueIdx=-1;
