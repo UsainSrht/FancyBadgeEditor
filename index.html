@@ -702,8 +702,8 @@ function drawBadge(cfg) {
 
   const vpad=Math.floor((innerH-CH)/2);
   let tW=0; for(let i=0;i<txt.length;i++){tW+=CW;if(i<txt.length-1)tW+=GAP;}
-  const innerW=snap8(tW+hpad*2);
-  const w=innerW+(hasBorder?1:0);
+  const w=snap8(tW+hpad*2);
+  const innerW=hasBorder?Math.max(1,w-1):w;
   const outH=h;
   const sx=Math.floor((innerW-tW)/2); // center
 
@@ -755,10 +755,10 @@ function drawBadge(cfg) {
     const borderStops=(border.stops&&border.stops.length)?[...border.stops].sort((a,b2)=>a.pos-b2.pos):[{color:'#ffe566',pos:0},{color:'#c49a00',pos:1}];
     const borderOpacity = border.opacity ?? 1;
     const pixels=[];
-    for(let x=0;x<Math.max(1,w-1);x++) pixels.push([x,0]);
-    for(let y=1;y<Math.max(1,outH-1);y++) pixels.push([0,y]);
-    if(w>1) pixels.push([w-1,0]);
-    if(outH>1) pixels.push([0,outH-1]);
+    for(let x=0;x<w;x++) pixels.push([x,0]);
+    for(let y=1;y<outH;y++) pixels.push([0,y]);
+    if(outH>1 && w>1) pixels.push([w-1,1]);
+    if(w>1 && outH>1) pixels.push([1,outH-1]);
 
     const denom=Math.max(1,pixels.length-1);
     pixels.forEach(([bx,by],idx)=>{
