@@ -3,10 +3,41 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fancy Badge Editor by UsainSrht</title>
+<title>Fancy Badge Editor | Pixel Badge Maker by UsainSrht</title>
+<meta name="description" content="Create pixel-style badges in your browser with solid or gradient text, shadows, borders, and instant PNG export for single badges or full strips.">
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+<meta name="author" content="UsainSrht">
+<meta name="theme-color" content="#1a0a2e">
+<meta name="application-name" content="Fancy Badge Editor">
+<link rel="canonical" href="https://fancybadgeeditor.usainsrht.com/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Fancy Badge Editor">
+<meta property="og:title" content="Fancy Badge Editor | Pixel Badge Maker">
+<meta property="og:description" content="Build retro pixel badges with gradients, shadows, border controls, and one-click PNG exports.">
+<meta property="og:url" content="https://fancybadgeeditor.usainsrht.com/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Fancy Badge Editor | Pixel Badge Maker">
+<meta name="twitter:description" content="Create and export pixel badge labels directly in your browser.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Fancy Badge Editor",
+  "url": "https://fancybadgeeditor.usainsrht.com/",
+  "description": "Browser-based pixel badge editor with gradient text, shadows, border options, and PNG export.",
+  "applicationCategory": "DesignApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript and a modern web browser",
+  "author": {
+    "@type": "Person",
+    "name": "UsainSrht"
+  }
+}
+</script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-
   :root {
     --purple-dark: #1a0a2e;
     --purple-mid:  #3d1a6e;
@@ -257,6 +288,17 @@
   .divider { height: 2px; background: linear-gradient(90deg,transparent,var(--gray-hi),transparent); margin: 8px 0; }
   .fx  { display: flex; gap: 6px; align-items: center; }
   .fxw { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
   @media (max-width:660px) {
     #main { grid-template-columns:1fr; }
     #right-col { position: static; }
@@ -272,7 +314,8 @@
     <div class="sub">by UsainSrht</div>
   </div>
 
-  <div id="main">
+  <main id="main" role="main">
+    <p class="sr-only">Fancy Badge Editor is a browser-based pixel badge generator. You can customize background type, text style, gradients, border, and shadows, then export a single badge or full badge strip as PNG.</p>
     <div><!-- LEFT COLUMN -->
 
       <!-- BACKGROUND -->
@@ -543,7 +586,7 @@
       </div>
 
     </div><!-- /right -->
-  </div>
+  </main>
 </div>
 
 <script>
