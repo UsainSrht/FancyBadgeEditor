@@ -1025,6 +1025,7 @@ function render() {
   document.getElementById('preview-label').textContent=`SINGLE: ${badge.width}×${badge.height}px`;
   renderStrip();
   applyIngamePreviewShadow();
+  saveToStorage();
 }
 
 function updateQueueDependentUi() {
@@ -1091,7 +1092,7 @@ function renderQueueList() {
   document.getElementById('update-btn').style.display=selectedQueueIdx>=0?'':'none';
 }
 
-function refreshQueue() { renderQueueList(); renderStrip(); }
+function refreshQueue() { renderQueueList(); renderStrip(); saveToStorage(); }
 
 function loadItem(i) {
   const q=queue[i];
@@ -1162,14 +1163,110 @@ function scaled(src,sc) {
 function dl(cv,name) { const a=document.createElement('a'); a.href=cv.toDataURL('image/png'); a.download=name; a.click(); }
 
 // ============================================================
+// PERSISTENCE (localStorage)
+// ============================================================
+const STORAGE_KEY = 'fbe_save';
+
+function saveToStorage() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({state, queue, selectedQueueIdx})); } catch(e) {}
+}
+
+function loadFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const saved = JSON.parse(raw);
+    if (!saved || !saved.state) return false;
+    const s = saved.state;
+    if (s.bg) {
+      state.bg.type  = s.bg.type  || state.bg.type;
+      state.bg.color = s.bg.color || state.bg.color;
+      if (Array.isArray(s.bg.stops) && s.bg.stops.length >= 2) state.bg.stops = s.bg.stops;
+      state.bg.angle = s.bg.angle ?? state.bg.angle;
+    }
+    if (s.text) {
+      state.text.value   = s.text.value   || state.text.value;
+      state.text.type    = s.text.type    || state.text.type;
+      state.text.color   = s.text.color   || state.text.color;
+      if (Array.isArray(s.text.stops) && s.text.stops.length >= 2) state.text.stops = s.text.stops;
+      state.text.gradDir = s.text.gradDir || state.text.gradDir;
+    }
+    if (s.shadow) Object.assign(state.shadow, s.shadow);
+    if (s.border) {
+      state.border.enabled = !!s.border.enabled;
+      state.border.type    = s.border.type  || state.border.type;
+      state.border.color   = s.border.color || state.border.color;
+      if (Array.isArray(s.border.stops) && s.border.stops.length >= 2) state.border.stops = s.border.stops;
+      state.border.opacity = s.border.opacity ?? state.border.opacity;
+    }
+    if (s.previewShadow) Object.assign(state.previewShadow, s.previewShadow);
+    if (s.height      != null) state.height       = s.height;
+    if (s.hpad        != null) state.hpad         = s.hpad;
+    if (s.previewScale!= null) state.previewScale = s.previewScale;
+    if (s.exportScale != null) state.exportScale  = s.exportScale;
+    if (Array.isArray(saved.queue)) { queue.length = 0; saved.queue.forEach(q => queue.push(q)); }
+    selectedQueueIdx = typeof saved.selectedQueueIdx === 'number' ? saved.selectedQueueIdx : -1;
+    return true;
+  } catch(e) { return false; }
+}
+
+// ============================================================
+// SYNC UI → STATE  (apply current state values to all inputs)
+// ============================================================
+function syncUIFromState() {
+  // BG
+  setToggleGroup('bg-type', state.bg.type);
+  document.getElementById('bg-solid-row').style.display = state.bg.type === 'solid' ? '' : 'none';
+  document.getElementById('bg-grad-row').style.display  = state.bg.type === 'gradient' ? '' : 'none';
+  syncPick('bg-color','bg-color-hex','bg-color-swatch', state.bg.color);
+  renderStopsList('bg-stops-list', state.bg.stops, () => render());
+  drawAngleWheel(state.bg.angle);
+  // Text
+  document.getElementById('badge-text').value = state.text.value;
+  setToggleGroup('text-type', state.text.type);
+  document.getElementById('text-solid-row').style.display = state.text.type === 'solid' ? '' : 'none';
+  document.getElementById('text-grad-row').style.display  = state.text.type === 'gradient' ? '' : 'none';
+  syncPick('txt-color','txt-color-hex','txt-color-swatch', state.text.color);
+  renderStopsList('txt-stops-list', state.text.stops, () => render());
+  setToggleGroup('txt-grad-dir', state.text.gradDir);
+  // Shadow
+  document.querySelectorAll('.scb[data-id]').forEach(b => b.classList.toggle('active', b.dataset.id === state.shadow.dir));
+  setToggleGroup('shadow-mode', state.shadow.mode);
+  document.getElementById('shadow-color-row').style.display = state.shadow.mode === 'solid' ? '' : 'none';
+  syncPick('shadow-color','shadow-color-hex','shadow-color-swatch', state.shadow.color);
+  document.getElementById('shadow-offset').value  = state.shadow.offset;
+  document.getElementById('shadow-opacity').value = state.shadow.opacity;
+  setSliderValueLabel('shadow-opacity','shadow-opacity-val');
+  // Border
+  setToggleGroup('border-enabled', state.border.enabled ? 'on' : 'off');
+  document.getElementById('border-settings').style.display = state.border.enabled ? '' : 'none';
+  setToggleGroup('border-type', state.border.type);
+  document.getElementById('border-solid-row').style.display = state.border.type === 'solid' ? '' : 'none';
+  document.getElementById('border-grad-row').style.display  = state.border.type === 'gradient' ? '' : 'none';
+  syncPick('border-color','border-color-hex','border-color-swatch', state.border.color);
+  document.getElementById('border-opacity').value = state.border.opacity;
+  setSliderValueLabel('border-opacity','border-opacity-val');
+  renderStopsList('border-stops-list', state.border.stops, () => render());
+  // Size
+  setToggleGroup('height-sel', String(state.height));
+  document.getElementById('h-pad').value = state.hpad;
+  setToggleGroup('preview-scale', String(state.previewScale));
+  setToggleGroup('export-scale', String(state.exportScale));
+  // In-game shadow
+  setToggleGroup('ig-shadow-enabled', state.previewShadow.enabled ? 'on' : 'off');
+  document.getElementById('ig-shadow-settings').style.display = state.previewShadow.enabled ? '' : 'none';
+  syncPick('ig-shadow-color','ig-shadow-color-hex','ig-shadow-color-swatch', state.previewShadow.color);
+  document.getElementById('ig-shadow-opacity').value = state.previewShadow.opacity;
+  setSliderValueLabel('ig-shadow-opacity','ig-shadow-opacity-val');
+}
+
+// ============================================================
 // INIT
 // ============================================================
 function init() {
+  loadFromStorage();
   initShadowCross();
   initAnglePicker();
-  renderStopsList('bg-stops-list',state.bg.stops,()=>render());
-  renderStopsList('txt-stops-list',state.text.stops,()=>render());
-  renderStopsList('border-stops-list',state.border.stops,()=>render());
 
   document.getElementById('bg-add-stop').addEventListener('click',()=>addStop(state.bg.stops,'bg-stops-list',()=>render()));
   document.getElementById('txt-add-stop').addEventListener('click',()=>addStop(state.text.stops,'txt-stops-list',()=>render()));
@@ -1238,15 +1335,6 @@ function init() {
     render();
   });
 
-  document.getElementById('shadow-opacity').value = state.shadow.opacity;
-  document.getElementById('border-opacity').value = state.border.opacity;
-  document.getElementById('ig-shadow-opacity').value = state.previewShadow.opacity;
-  setSliderValueLabel('shadow-opacity', 'shadow-opacity-val');
-  setSliderValueLabel('border-opacity', 'border-opacity-val');
-  setSliderValueLabel('ig-shadow-opacity', 'ig-shadow-opacity-val');
-  setToggleGroup('ig-shadow-enabled', state.previewShadow.enabled ? 'on' : 'off');
-  document.getElementById('ig-shadow-settings').style.display = state.previewShadow.enabled ? '' : 'none';
-
   document.getElementById('add-btn').addEventListener('click',()=>{
     queue.push(snap());selectedQueueIdx=-1;
     document.getElementById('update-btn').style.display='none'; refreshQueue();
@@ -1277,7 +1365,9 @@ function init() {
     queue.forEach((q,i)=>setTimeout(()=>dl(scaled(drawBadge(q),state.exportScale),`badge_${String(i+1).padStart(2,'0')}_${q.text}.png`),i*100));
   });
 
+  syncUIFromState();
   render();
+  refreshQueue();
 }
 
 document.addEventListener('DOMContentLoaded', init);
